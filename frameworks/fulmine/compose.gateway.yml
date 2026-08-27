@@ -1,14 +1,18 @@
-# gateway-64 - stock Caddy (TLS + h2 on 8443) in front of the fulmine server,
+# gateway-64 - stock nginx (TLS + h2 on 8443) in front of the fulmine server,
 # forwarding the dynamic endpoints over loopback h1 with keepalive. The server
 # gets no certs here, so it comes up cleartext on 8080 only.
 #
-# The CPU split is the knob worth sweeping, via PROXY_CPUSET / SERVER_CPUSET.
-# Terminating TLS under multiplexed h2 is usually the heavier half, so the
-# proxy starts with the same share as the server rather than less.
+# The edge used to be Caddy and is nginx from this commit; proxy-h2/nginx.conf
+# carries the reasoning and the numbers. gateway-h3 keeps Caddy, in proxy-h3/.
+#
+# The CPU split is the knob worth sweeping next, via PROXY_CPUSET /
+# SERVER_CPUSET, and it is left where Caddy had it so that this run measures
+# the proxy alone. Terminating TLS under multiplexed h2 was the heavier half
+# with Caddy in front; nginx may well want less of the budget than the server.
 services:
   proxy:
     build:
-      context: ./proxy
+      context: ./proxy-h2
     network_mode: host
     cpuset: "${PROXY_CPUSET:-0-15,64-79}"
     ulimits:

@@ -1,11 +1,15 @@
-# fulmine gateway edge.
+# fulmine gateway edge, QUIC.
 #
 # Stock Caddy terminates TLS and h1/h2/h3 on 8443, serves /static/* from disk,
 # and forwards the dynamic endpoints to the fulmine server. Both services run
 # with network_mode: host, so the server is reachable on loopback.
 #
-# The same file covers gateway-64 and gateway-h3: Caddy binds 8443 on tcp and
-# udp both, and only the load generator differs between the two profiles.
+# This file covered gateway-64 as well until the h2 edge moved to nginx, and it
+# is gateway-h3's alone now. Caddy stays here because it is what can serve the
+# profile at all - stock nginx has no QUIC listener - and because it is at the
+# top of the board on it rather than behind. h1 and h2 stay in `protocols`:
+# they cost nothing on a listener the h3 load generator reaches over udp, and
+# they are what answers the validator's curl.
 {
 	admin off
 	auto_https off
